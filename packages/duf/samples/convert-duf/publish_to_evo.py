@@ -22,10 +22,6 @@ def main():
     parser.add_argument('--duf-file', '-f', 
                        help='Path to the DUF file to convert',
                        default=None)
-    parser.add_argument('--epsg-code', '-e', 
-                       type=int,
-                       help='EPSG code for coordinate system',
-                       default=32650)
     parser.add_argument('--upload-path', '-p',
                        help='Upload path in the workspace',
                        default='notebook1')
@@ -43,6 +39,15 @@ def main():
     client_secret = os.getenv('EVO_CLIENT_SECRET')
     hub_url = os.getenv('EVO_HUB_URL')
     user_id = os.getenv('EVO_USER_AGENT')
+    epsg_code_str = os.getenv('EVO_EPSG_CODE')
+    
+    # Convert EPSG code to integer
+    try:
+        epsg_code = int(epsg_code_str) if epsg_code_str else None
+    except ValueError:
+        print(f"Error: Invalid EVO_EPSG_CODE in .env file: {epsg_code_str}")
+        print("EVO_EPSG_CODE must be a numeric value (e.g., 32650)")
+        sys.exit(1)
     
     # Validate required environment variables
     required_vars = {
@@ -51,7 +56,8 @@ def main():
         'EVO_CLIENT_ID': client_id,
         'EVO_CLIENT_SECRET': client_secret,
         'EVO_HUB_URL': hub_url,
-        'EVO_USER_AGENT': user_id
+        'EVO_USER_AGENT': user_id,
+        'EVO_EPSG_CODE': epsg_code
     }
     
     missing_vars = [var for var, value in required_vars.items() if not value]
@@ -64,6 +70,7 @@ def main():
         print("  EVO_CLIENT_SECRET=<your-client-secret>")
         print("  EVO_HUB_URL=<your-hub-url>")
         print("  EVO_USER_AGENT=<your-user-agent>")
+        print("  EVO_EPSG_CODE=<your-epsg-code>")
         sys.exit(1)
     
     creds = EvoWorkspaceMetadata(
@@ -76,11 +83,12 @@ def main():
     )
     
     # Determine DUF file path
-    if args.duf_file:
-        duf_file = args.duf_file
-    else:
-        # Use default file
-        duf_file = os.path.join(os.getcwd(), "data", "input", "Marlin Stopes.duf")
+    if not args.duf_file:
+        print("Error: DUF file path is required")
+        print("Please provide a DUF file using the --duf-file argument")
+        sys.exit(1)
+    
+    duf_file = args.duf_file
     
     # Check if file exists
     if not os.path.exists(duf_file):
@@ -88,7 +96,7 @@ def main():
         sys.exit(1)
     
     print(f"Converting DUF file: {duf_file}")
-    print(f"EPSG Code: {args.epsg_code}")
+    print(f"EPSG Code: {epsg_code}")
     print(f"Upload Path: {args.upload_path}")
     print(f"Combine Layers: {args.combine_layers}")
     print("-" * 50)
@@ -100,7 +108,7 @@ def main():
         # Call convert_duf function
         objects_metadata = convert_duf(
             filepath=duf_file,
-            epsg_code=args.epsg_code,
+            epsg_code=epsg_code,
             evo_workspace_metadata=creds,
             tags=tags,
             upload_path=None,
