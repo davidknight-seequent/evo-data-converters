@@ -1,0 +1,50 @@
+ 
+======================================== 
+[Mon 13/10/2025 16:39:23.26] Convert DUF Log 
+======================================== 
+[Mon 13/10/2025 16:39:23.29] Command: "C:\Users\david.knight\Downloads\fork\evo-data-converters\packages\duf\samples\convert-duf\convert_duf.bat"  
+[Mon 13/10/2025 16:39:23.31] Checking for .env file... 
+[Mon 13/10/2025 16:39:23.32] Found .env file 
+[Mon 13/10/2025 16:39:23.33] Loading environment variables from .env file... 
+[Mon 13/10/2025 16:39:23.34] Loaded: DUF_FILE_PATH 
+[Mon 13/10/2025 16:39:23.34] Loaded: EVO_ORG_ID 
+[Mon 13/10/2025 16:39:23.34] Loaded: EVO_WORKSPACE_ID 
+[Mon 13/10/2025 16:39:23.34] Loaded: EVO_CLIENT_ID 
+[Mon 13/10/2025 16:39:23.34] Loaded: EVO_CLIENT_SECRET 
+[Mon 13/10/2025 16:39:23.34] Loaded: EVO_HUB_URL 
+[Mon 13/10/2025 16:39:23.34] Loaded: EVO_USER_AGENT 
+[Mon 13/10/2025 16:39:23.39] Successfully loaded DUF_FILE_PATH from .env 
+ECHO is off.
+ECHO is off.
+[Mon 13/10/2025 16:39:23.40] ======================================== 
+[Mon 13/10/2025 16:39:23.42] Publish DUF to Evo Script 
+[Mon 13/10/2025 16:39:23.42] ======================================== 
+[Mon 13/10/2025 16:39:23.42] Source: \\consus.ad.seequent.com\Shares\Testing\Test Data (New)\Deswik\Marlin Mapping v1.duf 
+[Mon 13/10/2025 16:39:23.43] Destination: C:\Users\david.knight\Downloads\fork\evo-data-converters\packages\duf\samples\convert-duf\temp\Marlin Mapping v1.duf 
+ECHO is off.
+[Mon 13/10/2025 16:39:23.45] Verifying source file exists... 
+[Mon 13/10/2025 16:39:23.45] Checking path: \\consus.ad.seequent.com\Shares\Testing\Test Data (New)\Deswik\Marlin Mapping v1.duf 
+[Mon 13/10/2025 16:39:23.45] Source file verified - file exists 
+ECHO is off.
+[Mon 13/10/2025 16:39:23.47] WARNING: Destination file already exists - will overwrite 
+[Mon 13/10/2025 16:39:23.49] Copying file from source to temp folder... 
+[Mon 13/10/2025 16:39:23.49] This may take a moment for large files... 
+ECHO is off.
+[Mon 13/10/2025 16:39:23.90] SUCCESS: File copied successfully 
+[Mon 13/10/2025 16:39:23.90] File is now available at: C:\Users\david.knight\Downloads\fork\evo-data-converters\packages\duf\samples\convert-duf\temp\Marlin Mapping v1.duf 
+ECHO is off.
+[Mon 13/10/2025 16:39:23.94] ======================================== 
+[Mon 13/10/2025 16:39:23.94] Starting Evo Publishing Process 
+[Mon 13/10/2025 16:39:23.95] ======================================== 
+[Mon 13/10/2025 16:39:23.95] Running publish_to_evo.py... 
+[Mon 13/10/2025 16:39:23.97] This may take several minutes depending on file size... 
+ECHO is off.
+Running Python script... 
+Python script finished with exit code: 0 
+ECHO is off.
+[Mon 13/10/2025 16:45:03.18] Python script completed successfully. 
+ECHO is off.
+[Mon 13/10/2025 16:45:03.23] ======================================== 
+[Mon 13/10/2025 16:45:03.24] Script execution completed. 
+[Mon 13/10/2025 16:45:03.25] ======================================== 
+[Mon 13/10/2025 16:45:03.26] Check log file for details: C:\Users\david.knight\Downloads\fork\evo-data-converters\packages\duf\samples\convert-duf\log.txt 
