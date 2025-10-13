@@ -160,7 +160,7 @@ if not exist "%~dp0publish_to_evo.py" (
 
 REM Run the Python script and show output on console
 echo Running Python script... >> "%LOG_FILE%"
-"%~dp0.venv\Scripts\python.exe" "%~dp0publish_to_evo.py" --duf-file "%DEST_FILE%"
+"%~dp0.venv\Scripts\python.exe" "%~dp0publish_to_evo.py" --duf-file "%DEST_FILE%" 2>&1 | "%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -Command "$input | ForEach-Object { Write-Output $_; Add-Content -Path '%LOG_FILE%' -Value $_ }"
 set PYTHON_EXIT_CODE=%ERRORLEVEL%
 echo Python script finished with exit code: %PYTHON_EXIT_CODE% >> "%LOG_FILE%"
 
@@ -170,6 +170,20 @@ if %PYTHON_EXIT_CODE% equ 0 (
 ) else (
     call :log ""
     call :log "[%DATE% %TIME%] WARNING: Python script exited with code: %PYTHON_EXIT_CODE%"
+)
+
+call :log ""
+REM Clean up temp folder
+call :log "[%DATE% %TIME%] Cleaning up temporary files..."
+if exist "%DEST_DIR%" (
+    rd /s /q "%DEST_DIR%" >nul 2>&1
+    if exist "%DEST_DIR%" (
+        call :log "[%DATE% %TIME%] WARNING: Could not delete temp folder: %DEST_DIR%"
+    ) else (
+        call :log "[%DATE% %TIME%] Temporary folder deleted successfully"
+    )
+) else (
+    call :log "[%DATE% %TIME%] No temp folder to clean up"
 )
 
 call :log ""
