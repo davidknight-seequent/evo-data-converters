@@ -20,12 +20,9 @@ def main():
     load_dotenv()
 
     parser = argparse.ArgumentParser(description='Convert DUF files and publish to EVO workspace')
-    parser.add_argument('--duf-file', '-f', 
+    parser.add_argument('--duf-file', '-f',
                        help='Path to the DUF file to convert',
                        default=None)
-    parser.add_argument('--upload-path', '-p',
-                       help='Upload path in the workspace',
-                       default='notebook1')
     parser.add_argument('--combine-layers', '-c',
                        action='store_true',
                        help='Combine objects in layers',
@@ -41,6 +38,7 @@ def main():
     hub_url = os.getenv('EVO_HUB_URL')
     user_id = os.getenv('EVO_USER_AGENT')
     epsg_code_str = os.getenv('EVO_EPSG_CODE')
+    upload_path = os.getenv('EVO_UPLOAD_PATH', '')
 
     # Convert EPSG code to integer
     try:
@@ -98,7 +96,7 @@ def main():
 
     print(f"Converting DUF file: {duf_file}")
     print(f"EPSG Code: {epsg_code}")
-    print(f"Upload Path: {args.upload_path}")
+    print(f"Upload Path: {upload_path if upload_path else '(root level)'}")
     print(f"Combine Layers: {args.combine_layers}")
     print("-" * 50)
 
@@ -112,7 +110,7 @@ def main():
             epsg_code=epsg_code,
             evo_workspace_metadata=creds,
             tags=tags,
-            upload_path=None,
+            upload_path=upload_path,
             combine_objects_in_layers=True,
             overwrite_existing_objects=True,
         )

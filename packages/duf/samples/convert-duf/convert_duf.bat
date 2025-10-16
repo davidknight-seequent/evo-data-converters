@@ -71,8 +71,10 @@ call :log "[%DATE% %TIME%] Successfully loaded DUF_FILE_PATH from .env"
 call :log ""
 
 REM Use DUF_FILE_PATH from .env file
+REM Remove any leading/trailing quotes and spaces from DUF_FILE_PATH
 set "SOURCE_FILE=%DUF_FILE_PATH%"
-for %%F in ("%DUF_FILE_PATH%") do set "FILENAME=%%~nxF"
+set "SOURCE_FILE=%SOURCE_FILE:"=%"
+for %%F in ("%SOURCE_FILE%") do set "FILENAME=%%~nxF"
 
 REM Set destination variables
 set "DEST_DIR=%~dp0temp"

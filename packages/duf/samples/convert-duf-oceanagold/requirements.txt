@@ -1,0 +1,4 @@
+numpy<=1.26.4
+evo-sdk
+evo-data-converters-duf>=0.1.3
+python-dotenv
