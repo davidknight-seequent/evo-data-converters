@@ -20,9 +20,48 @@ from evo.objects import ObjectAPIClient
 from evo.objects.data import ObjectMetadata
 from evo.objects.utils import ObjectDataClient
 
+from . import create_evo_object_service_and_data_client
+from .evo_client import create_service_and_data_client_from_metadata, EvoWorkspaceMetadata
 from .generate_paths import generate_paths
 
 logger = evo.logging.getLogger("data_converters")
+
+
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
+_executor = ThreadPoolExecutor(max_workers=1)
+
+
+# Usage inside your deep synchronous function:
+def _run_on_other_thread(coro_func, metadata: EvoWorkspaceMetadata):
+
+    def _worker(coro_func):
+        print("in worker")
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            print(metadata.hub_url)
+            print(metadata.org_id)
+            print(metadata.workspace_id)
+            print(metadata.client_id)
+            print(metadata.client_secret)
+            print(metadata.cache_root)
+            print(metadata.redirect_url)
+            api_client, data_client = create_service_and_data_client_from_metadata(metadata)
+            coro = coro_func(data_client, api_client)
+            print("before loop")
+            return loop.run_until_complete(coro)
+        finally:
+            print("not yet at finally")
+            asyncio.set_event_loop(None)
+            loop.close()
+            print("closed")
+
+    print("before submit")
+    future = _executor.submit(_worker, coro_func)
+    print("made fut")
+    return future.result()
 
 
 def publish_geoscience_objects(
@@ -38,15 +77,41 @@ def publish_geoscience_objects(
     objects_metadata = []
     paths = generate_paths(object_models, path_prefix)
 
-    nest_asyncio.apply()
+    # nest_asyncio.apply()
 
-    logger.debug(f"Preparing to publish {len(object_models)} objects to paths: {paths}")
-    for obj, obj_path in zip(object_models, paths):
-        object_metadata = asyncio.run(
-            publish_geoscience_object(obj_path, obj, object_service_client, data_client, overwrite_existing_objects)
-        )
-        logger.debug(f"Got object metadata: {object_metadata}")
-        objects_metadata.append(object_metadata)
+    print("Before bg thread")
+
+
+    env = data_client._environment
+    connector = data_client._connector
+    authorizer = connector._authorizer
+    metadata = EvoWorkspaceMetadata(
+        org_id=str(env.org_id),
+        workspace_id=str(env.workspace_id),
+        hub_url=str(env.hub_url),
+        client_id=str(authorizer._connector._OAuthConnector__client_id),
+        client_secret=str(authorizer._connector._OAuthConnector__client_secret),
+        cache_root=str(data_client._cache._root),
+        redirect_url=str(authorizer._redirect_url),
+        # user_id=connector._additional_headers["s2s-user-info"]
+    )
+
+    async def do_publish(data_client, object_service_client):
+        print(data_client._connector._authorizer)
+        print("In do_publish")
+        logger.debug(f"Preparing to publish {len(object_models)} objects to paths: {paths}")
+        objects_metadata = []
+        for obj, obj_path in zip(object_models, paths):
+            print("before await")
+
+            object_metadata = await publish_geoscience_object(obj_path, obj, object_service_client, data_client, overwrite_existing_objects)
+
+            print("after await")
+            logger.debug(f"Got object metadata: {object_metadata}")
+            objects_metadata.append(object_metadata)
+        return objects_metadata
+
+    objects_metadata = _run_on_other_thread(do_publish, metadata)
 
     return objects_metadata
 
