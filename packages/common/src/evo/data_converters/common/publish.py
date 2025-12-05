@@ -9,9 +9,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import asyncio
-
-import nest_asyncio
 from evo_schemas.components import BaseSpatialDataProperties_V1_0_1
 
 from evo.common.exceptions import NotFoundException
@@ -20,8 +17,7 @@ from evo.objects import ObjectAPIClient
 from evo.objects.data import ObjectMetadata
 from evo.objects.utils import ObjectDataClient
 
-from . import create_evo_object_service_and_data_client
-from .evo_client import create_service_and_data_client_from_metadata, EvoWorkspaceMetadata
+from .evo_client import EvoWorkspaceMetadata, create_service_and_data_client_from_metadata
 from .generate_paths import generate_paths
 
 logger = evo.logging.getLogger("data_converters")
@@ -33,22 +29,23 @@ from concurrent.futures import ThreadPoolExecutor
 _executor = ThreadPoolExecutor(max_workers=1)
 
 
-# Usage inside your deep synchronous function:
-def _run_on_other_thread(coro_func, metadata: EvoWorkspaceMetadata):
+def _run_on_other_thread(coro_func, metadata: EvoWorkspaceMetadata, token):
 
     def _worker(coro_func):
         print("in worker")
+        print(metadata.hub_url)
+        print(metadata.org_id)
+        print(metadata.workspace_id)
+        print(metadata.client_id)
+        print(metadata.client_secret)
+        print(metadata.cache_root)
+        print(metadata.redirect_url)
         try:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            print(metadata.hub_url)
-            print(metadata.org_id)
-            print(metadata.workspace_id)
-            print(metadata.client_id)
-            print(metadata.client_secret)
-            print(metadata.cache_root)
-            print(metadata.redirect_url)
-            api_client, data_client = create_service_and_data_client_from_metadata(metadata)
+            api_client, data_client = create_service_and_data_client_from_metadata(metadata, needs_login=False)
+            api_client._connector._authorizer._BaseAuthorizer__token = token
+            api_client._connector._authorizer._AuthorizationCodeAuthorizer__token = token
             coro = coro_func(data_client, api_client)
             print("before loop")
             return loop.run_until_complete(coro)
@@ -95,6 +92,7 @@ def publish_geoscience_objects(
         redirect_url=str(authorizer._redirect_url),
         # user_id=connector._additional_headers["s2s-user-info"]
     )
+    token = authorizer._get_token()
 
     async def do_publish(data_client, object_service_client):
         print(data_client._connector._authorizer)
@@ -111,7 +109,7 @@ def publish_geoscience_objects(
             objects_metadata.append(object_metadata)
         return objects_metadata
 
-    objects_metadata = _run_on_other_thread(do_publish, metadata)
+    objects_metadata = _run_on_other_thread(do_publish, metadata, token)
 
     return objects_metadata
 

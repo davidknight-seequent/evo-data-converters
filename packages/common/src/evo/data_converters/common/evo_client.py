@@ -55,7 +55,7 @@ class EvoObjectMetadata:
 
 
 async def _authorization_code_authorizer(
-    transport: ITransport, metadata: EvoWorkspaceMetadata
+    transport: ITransport, metadata: EvoWorkspaceMetadata, needs_login: bool = True
 ) -> AuthorizationCodeAuthorizer:
     authorizer = AuthorizationCodeAuthorizer(
         redirect_url=metadata.redirect_url,
@@ -65,7 +65,8 @@ async def _authorization_code_authorizer(
             client_id=metadata.client_id,
         ),
     )
-    await authorizer.login()
+    if needs_login:
+        await authorizer.login()
 
     return authorizer
 
@@ -116,7 +117,7 @@ def create_service_and_data_client_from_manager(
 
 
 def create_service_and_data_client_from_metadata(
-    metadata: EvoWorkspaceMetadata,
+    metadata: EvoWorkspaceMetadata, needs_login: bool = True
 ) -> tuple[ObjectAPIClient, ObjectDataClient]:
     logger.debug(
         "Creating evo.objects.ObjectAPIClient and evo.objects.utils.data.ObjectDataClient with "
@@ -138,7 +139,7 @@ def create_service_and_data_client_from_metadata(
         )
     else:
         if metadata.has_authentication_code_params():
-            authorizer = asyncio.run(_authorization_code_authorizer(transport, metadata))
+            authorizer = asyncio.run(_authorization_code_authorizer(transport, metadata, needs_login))
         else:
             logger.debug("Skipping authentication due to missing required parameters.")
 
